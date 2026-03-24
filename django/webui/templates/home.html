@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <form method="post" enctype="multipart/form-data" id="main-form" class="card shadow-sm">
+      {% csrf_token %}
+
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label">Текст / paste screenshot или PDF:</label>
+          <textarea
+            id="text-input"
+            name="text_input"
+            class="form-control"
+            rows="3"
+            placeholder="Внеси текст или paste (Ctrl+V) слика/PDF..."
+          ></textarea>
+          <div id="pasted-file-info" class="form-text text-success d-none">
+            Додаден е фајл од clipboard.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Прикачи фајл (слика или PDF):</label>
+          <input type="file" name="file_input" class="form-control" accept="image/*,application/pdf">
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+          <button class="btn btn-primary rounded-pill px-3" type="button" id="camera-btn">Camera</button>
+          <button class="btn btn-primary rounded-pill px-3" type="submit">Submit</button>
+        </div>
+
+        <div id="camera-container" class="d-none">
+          <video id="camera-stream" autoplay class="w-100 rounded border"></video>
+          <div class="mt-2 d-flex gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" id="capture-btn">Slikaj</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="close-camera-btn">Close</button>
+          </div>
+        </div>
+
+        <input type="hidden" name="camera_image" id="camera-image-input">
+        <input type="hidden" name="pasted_file_data" id="pasted-file-data">
+        <input type="hidden" name="pasted_file_type" id="pasted-file-type">
+        <input type="hidden" name="pasted_file_name" id="pasted-file-name">
+      </div>
+    </form>
+
+    {% if result %}
+      <div class="card mt-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="text-center mb-3">Изваден текст:</h5>
+
+          <!-- НЕ pre; користиме div за MathJax да рендерира правилно -->
+          <div id="result" class="bg-white border rounded p-3 text-start" style="white-space: pre-wrap;">
+            {{ result|safe }}
+          </div>
+        </div>
+      </div>
+
+      <script>
+        if (window.MathJax) {
+          MathJax.typesetPromise();
+        }
+      </script>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const textArea = document.getElementById('text-input');
+
+  const cameraBtn = document.getElementById('camera-btn');
+  const cameraContainer = document.getElementById('camera-container');
+  const video = document.getElementById('camera-stream');
+  const captureBtn = document.getElementById('capture-btn');
+  const closeBtn = document.getElementById('close-camera-btn');
+  const cameraHiddenInput = document.getElementById('camera-image-input');
+
+  const pastedInfo = document.getElementById('pasted-file-info');
+  const pastedDataInput = document.getElementById('pasted-file-data');
+  const pastedTypeInput = document.getElementById('pasted-file-type');
+  const pastedNameInput = document.getElementById('pasted-file-name');
+
+  let stream = null;
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      cameraContainer.classList.remove('d-none');
+    } catch (err) {
+      alert('Не можам да пристапам до камерата: ' + err);
+    }
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    cameraContainer.classList.add('d-none');
+  }
+
+  cameraBtn.addEventListener('click', startCamera);
+  closeBtn.addEventListener('click', stopCamera);
+
+  captureBtn.addEventListener('click', function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    cameraHiddenInput.value = canvas.toDataURL('image/png');
+    stopCamera();
+  });
+
+  textArea.addEventListener('paste', function(event) {
+    const items = event.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            pastedDataInput.value = e.target.result;
+            pastedTypeInput.value = file.type;
+            pastedNameInput.value = file.name || 'pasted-file';
+            pastedInfo.classList.remove('d-none');
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+# virtual env
+.venv/
+
+# pycache
+__pycache__/
+
+# IDE settings
+.idea/
+
+# pdf files
+.pdf/
+
+#json files
+.jason/
+
+#env file
+.env
+
+#pictures
+.screenshots/
+
+
+.venv/
+__pycache__/
+*.pyc
+.env
+.idea/

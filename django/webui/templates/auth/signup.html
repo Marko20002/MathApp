@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-5">
+    <h3 class="mb-3">Sign up</h3>
+
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-2">
+        <label class="form-label">Име</label>
+        <input class="form-control" name="first_name">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Презиме</label>
+        <input class="form-control" name="last_name">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Username</label>
+        <input class="form-control" name="username" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" name="password" required>
+      </div>
+
+      <button class="btn btn-primary w-100" type="submit">Create account</button>
+      <div class="text-center mt-2">
+        <a href="{% url 'login' %}">Веќе имаш акаунт? Log in</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-lg-6">
+    <h3 class="mb-3">Profile</h3>
+
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-2">
+        <label class="form-label">Име</label>
+        <input class="form-control" name="first_name" value="{{ user.first_name }}">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Презиме</label>
+        <input class="form-control" name="last_name" value="{{ user.last_name }}">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Username</label>
+        <input class="form-control" name="username" value="{{ user.username }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">New password (optional)</label>
+        <input class="form-control" type="password" name="password" placeholder="Остави празно ако не менуваш">
+      </div>
+
+      <button class="btn btn-primary" type="submit">Save</button>
+      <a class="btn btn-outline-secondary" href="{% url 'home' %}">Back</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
