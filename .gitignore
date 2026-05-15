@@ -24,4 +24,6 @@ __pycache__/
 __pycache__/
 *.pyc
 .env
-.idea/
+.idea/node_modules/
+db.sqlite3
+*.sqlite3
