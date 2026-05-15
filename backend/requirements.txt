@@ -1,0 +1,10 @@
+django>=5.2,<6
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+python-dotenv
+openai
+opencv-python
+easyocr
+pdfplumber
+numpy
