@@ -1,0 +1,136 @@
+{
+  "version": "baseline-v1",
+  "created_at": "2026-09-21T12:54:47.549191+00:00",
+  "status": "candidate",
+  "experimental": true,
+  "limitation": "Held-out dataset evaluation only. Synthetic results do not establish real-world accuracy. Scores are uncalibrated.",
+  "dataset": {
+    "sha256": "ab382497223ff83c72de81844fc785ae6e8e8771fd93ddfb4b44c50199cb1d65",
+    "rows": 1000,
+    "labels": {
+      "CALCULUS": 333,
+      "PROBABILITY": 333,
+      "DISCRETE": 334
+    },
+    "review_status": {
+      "pending": 1000
+    },
+    "languages": {
+      "en": 1000
+    },
+    "sources": {
+      "synthetic": 1000
+    },
+    "declared_groups": 1000,
+    "effective_groups": 1000
+  },
+  "used_rows": 1000,
+  "input_fields": [
+    "question"
+  ],
+  "python_version": "3.12.13",
+  "sklearn_version": "1.7.2",
+  "split_seed": [
+    42,
+    43
+  ],
+  "trials": [
+    {
+      "C": 0.5,
+      "validation_macro_f1": 0.9605580693815988
+    },
+    {
+      "C": 2.0,
+      "validation_macro_f1": 0.9703646474819306
+    }
+  ],
+  "splits": {
+    "train": {
+      "rows": 599,
+      "groups": 599,
+      "labels": {
+        "CALCULUS": 199,
+        "PROBABILITY": 201,
+        "DISCRETE": 199
+      }
+    },
+    "validation": {
+      "rows": 201,
+      "groups": 201,
+      "labels": {
+        "CALCULUS": 67,
+        "PROBABILITY": 66,
+        "DISCRETE": 68
+      }
+    },
+    "test": {
+      "rows": 200,
+      "groups": 200,
+      "labels": {
+        "CALCULUS": 67,
+        "PROBABILITY": 66,
+        "DISCRETE": 67
+      }
+    }
+  },
+  "test": {
+    "accuracy": 0.965,
+    "macro_f1": 0.9650819011550417,
+    "per_class": {
+      "CALCULUS": {
+        "precision": 0.9178082191780822,
+        "recall": 1.0,
+        "f1-score": 0.9571428571428572,
+        "support": 67.0
+      },
+      "PROBABILITY": {
+        "precision": 1.0,
+        "recall": 0.9848484848484849,
+        "f1-score": 0.9923664122137404,
+        "support": 66.0
+      },
+      "DISCRETE": {
+        "precision": 0.9838709677419355,
+        "recall": 0.9104477611940298,
+        "f1-score": 0.9457364341085271,
+        "support": 67.0
+      },
+      "accuracy": 0.965,
+      "macro avg": {
+        "precision": 0.9672263956400059,
+        "recall": 0.9650987486808381,
+        "f1-score": 0.9650819011550417,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.9670625276182059,
+        "recall": 0.965,
+        "f1-score": 0.9649454785997481,
+        "support": 200.0
+      }
+    },
+    "confusion_matrix_labels": [
+      "CALCULUS",
+      "PROBABILITY",
+      "DISCRETE"
+    ],
+    "confusion_matrix": [
+      [
+        67,
+        0,
+        0
+      ],
+      [
+        0,
+        65,
+        1
+      ],
+      [
+        6,
+        0,
+        61
+      ]
+    ]
+  },
+  "artifact_sha256": "4f7a5589b520476f0ec3a1f77229f62485d64620763e8a1b9b65834329273a13"
+}

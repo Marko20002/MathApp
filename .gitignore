@@ -1,29 +1,27 @@
-# virtual env
+# Reinstallable tools and generated caches/builds (not project data).
 .venv/
-
-# pycache
 __pycache__/
-
-# IDE settings
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+node_modules/
+frontend/dist/
+# Private configuration, credentials, database state, and user uploads.
+.env
+.env.*
+!.env.example
 .idea/
-
-# pdf files
-.pdf/
-
-#json files
-.jason/
-
-#env file
-.env
-
-#pictures
-.screenshots/
-
-
-.venv/
-__pycache__/
-*.pyc
-.env
-.idea/node_modules/
-db.sqlite3
+.DS_Store
 *.sqlite3
+*.sqlite3-*
+data/runtime/
+data/uploads/
+*.pem
+*.key
+.envrc
+.pgpass
+credentials.json
+secrets.json
+backend/staticfiles/
+
+# Training CSVs, reviewed exports, model artifacts, and reports are tracked.

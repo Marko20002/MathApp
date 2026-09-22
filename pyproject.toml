@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mathapp-ml"
+version = "0.1.0"
+description = "Question-only classification and dataset validation"
+requires-python = ">=3.11"
+dependencies = [
+    "scikit-learn>=1.7,<1.8",
+    "joblib>=1.4,<2",
+    "djangorestframework-stubs>=3.18.1",
+]
+
+[project.scripts]
+mathapp-ml = "mathapp_ml.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["ml/src"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "math_project.settings"
+pythonpath = ["backend", "ml/src"]
+testpaths = ["tests"]

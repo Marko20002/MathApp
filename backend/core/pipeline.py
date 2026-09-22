@@ -1,66 +1,42 @@
-"""
-pipeline.py — orchestrates input → OCR (if needed) → DeepSeek solve
-
-Three public functions used by solver/views.py:
-  solve_text(text)               → dict
-  solve_image_bytes(bytes)       → dict   (EasyOCR → DeepSeek)
-  solve_pdf_bytes(bytes)         → dict   (pdfplumber → DeepSeek)
-
-Each returns: { solution, domain, problem_text }
-"""
-import cv2
-import numpy as np
-
-from core.mathsolver import solve_math
-from core.ocr.easyocr_engine import run_easyocr
-from core.ocr.pdf import extract_pdf_text
+"""Extract a task, classify it, then solve it. Heavy OCR imports are lazy."""
+from .classification import classify_question
+from .errors import PipelineError
 
 
-def _detect_domain(text: str) -> str:
-    t = text.lower()
-    scores = {
-        'calculus':    sum(w in t for w in ['integral', 'derivative', 'limit', 'lim', 'dx', '∫', 'd/dx', 'differentiat']),
-        'probability': sum(w in t for w in ['probability', 'distribution', 'expected', 'variance', 'random', 'p(']),
-        'discrete':    sum(w in t for w in ['graph', 'permutation', 'combination', 'set', 'logic', 'modulo', 'induction']),
-    }
-    best = max(scores, key=scores.get)
-    return best if scores[best] > 0 else 'unknown'
-
-
-def _build_result(problem_text: str, solution: str) -> dict:
-    return {
-        'problem_text': problem_text,
-        'solution':     solution,
-        'domain':       _detect_domain(problem_text + ' ' + solution),
-    }
-
-
-def solve_text(text: str) -> dict:
+def _solve(text, history=None):
     text = text.strip()
     if not text:
-        return _build_result('', '[No text provided.]')
-    return _build_result(text, solve_math(text))
+        raise PipelineError('empty_extraction', 'No problem text could be extracted.')
+    if len(text) > 20000:
+        raise PipelineError('problem_too_long', 'Use a problem of at most 20000 characters.', 400)
+    classification = classify_question(text)
+    from .mathsolver import solve_math
+    provider_solution = solve_math(text, history=history)
+    if provider_solution.text == '[NOT_MATH]':
+        raise PipelineError('not_math', 'Please enter a math problem.', 400)
+    return {'problem_text': text, 'solution': provider_solution.text,
+            'domain': classification['label'].lower(), 'classification': classification,
+            'provider': provider_solution.provider, 'provider_model': provider_solution.model,
+            'usage': provider_solution.usage, 'openai_subject': provider_solution.subject,
+            'final_answer': provider_solution.final_answer, 'memory': provider_solution.memory}
 
 
-def solve_image_bytes(image_bytes: bytes, ocr_engine: str = '1') -> dict:
-    arr   = np.frombuffer(image_bytes, np.uint8)
-    frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+def solve_text(text, history=None):
+    return _solve(text, history)
 
+
+def solve_image_bytes(image_bytes, ocr_engine='2', history=None, caption=''):
+    import cv2
+    import numpy as np
+    from .ocr.easyocr_engine import run_easyocr
+    frame = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     if frame is None:
-        return _build_result('', '[Could not decode image.]')
-
-    text = run_easyocr(frame)
-    if not text:
-        return _build_result('', '[Could not extract text from image. Try a clearer photo.]')
-
-    return _build_result(text, solve_math(text))
+        raise PipelineError('invalid_image', 'Could not decode the image.', 400)
+    if frame.shape[0] * frame.shape[1] > 20000000:
+        raise PipelineError('image_too_large', 'Use an image below 20 megapixels.', 400)
+    return _solve('\n\n'.join(filter(None, [caption, run_easyocr(frame)])), history)
 
 
-def solve_pdf_bytes(pdf_bytes: bytes) -> dict:
-    # pdfplumber accepts BytesIO directly — no temp file needed
-    text = extract_pdf_text(pdf_bytes)
-
-    if not text:
-        return _build_result('', '[No text found in PDF.]')
-
-    return _build_result(text, solve_math(text))
+def solve_pdf_bytes(pdf_bytes, history=None, caption=''):
+    from .ocr.pdf import extract_pdf_text
+    return _solve('\n\n'.join(filter(None, [caption, extract_pdf_text(pdf_bytes)])), history)
